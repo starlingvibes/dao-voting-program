@@ -1,7 +1,10 @@
 pub mod dao_voting_program_fuzz_instructions {
     use crate::accounts_snapshots::*;
+    use anchor_lang::system_program;
+    use solana_sdk::native_token::LAMPORTS_PER_SOL;
     use trident_client::fuzzing::*;
     #[derive(Arbitrary, DisplayIx, FuzzTestExecutor, FuzzDeserialize)]
+    // #[derive(Arbitrary, DisplayIx, FuzzDeserialize)]
     pub enum FuzzInstruction {
         CreateTeam(CreateTeam),
         AddMember(AddMember),
@@ -48,7 +51,8 @@ pub mod dao_voting_program_fuzz_instructions {
     pub struct AddMemberData {
         pub _team_name: String,
         pub _team_id: u64,
-        pub member: AccountId,
+        pub member: Pubkey,
+        // pub member: u8,
     }
     #[derive(Arbitrary, Debug)]
     pub struct RemoveMember {
@@ -247,8 +251,8 @@ pub mod dao_voting_program_fuzz_instructions {
             _fuzz_accounts: &mut FuzzAccounts,
         ) -> Result<Self::IxData, FuzzingError> {
             let data = dao_voting_program::instruction::CreateTeam {
-                team_name: todo!(),
-                team_id: todo!(),
+                team_name: self.data.team_name.clone(),
+                team_id: self.data.team_id,
             };
             Ok(data)
         }
@@ -257,11 +261,30 @@ pub mod dao_voting_program_fuzz_instructions {
             client: &mut impl FuzzClient,
             fuzz_accounts: &mut FuzzAccounts,
         ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
+            let signer = fuzz_accounts.signer.get_or_create_account(
+                self.accounts.signer,
+                client,
+                1 * LAMPORTS_PER_SOL,
+            );
+
+            let team_account = fuzz_accounts
+                .team_account
+                .get_or_create_account(
+                    self.accounts.team_account,
+                    // &[_team_name.as_bytes(), &_team_id.to_ne_bytes()],
+                    &[
+                        self.data.team_name.as_bytes(),
+                        &self.data.team_id.to_ne_bytes(),
+                    ],
+                    &dao_voting_program::ID,
+                )
+                .unwrap();
+
+            let signers = vec![signer.clone()];
             let acc_meta = dao_voting_program::accounts::CreateTeam {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
+                team_account: team_account.pubkey(),
+                signer: signer.pubkey(),
+                system_program: system_program::ID,
             }
             .to_account_metas(None);
             Ok((signers, acc_meta))
@@ -277,9 +300,10 @@ pub mod dao_voting_program_fuzz_instructions {
             _fuzz_accounts: &mut FuzzAccounts,
         ) -> Result<Self::IxData, FuzzingError> {
             let data = dao_voting_program::instruction::AddMember {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                member: todo!(),
+                _team_name: self.data._team_name.clone(),
+                _team_id: self.data._team_id,
+                member: self.data.member,
+                // member: Pubkey::new(&self.data.member.to_le_bytes()),
             };
             Ok(data)
         }
@@ -288,366 +312,383 @@ pub mod dao_voting_program_fuzz_instructions {
             client: &mut impl FuzzClient,
             fuzz_accounts: &mut FuzzAccounts,
         ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
+            let signer = fuzz_accounts.signer.get_or_create_account(
+                self.accounts.signer,
+                client,
+                1 * LAMPORTS_PER_SOL,
+            );
+            let team_account = fuzz_accounts
+                .team_account
+                .get_or_create_account(
+                    self.accounts.team_account,
+                    &[
+                        self.data._team_name.as_bytes(),
+                        &self.data._team_id.to_ne_bytes(),
+                    ],
+                    &dao_voting_program::ID,
+                )
+                .unwrap();
+
+            let signers = vec![signer.clone()];
             let acc_meta = dao_voting_program::accounts::AddMember {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
+                team_account: team_account.pubkey(),
+                signer: signer.pubkey(),
+                system_program: system_program::ID,
             }
             .to_account_metas(None);
             Ok((signers, acc_meta))
         }
     }
-    impl<'info> IxOps<'info> for RemoveMember {
-        type IxData = dao_voting_program::instruction::RemoveMember;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = RemoveMemberSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::RemoveMember {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                member: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::RemoveMember {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for TransferCaptain {
-        type IxData = dao_voting_program::instruction::TransferCaptain;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = TransferCaptainSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::TransferCaptain {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                member: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::TransferCaptain {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for LeaveTeam {
-        type IxData = dao_voting_program::instruction::LeaveTeam;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = LeaveTeamSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::LeaveTeam {
-                _team_name: todo!(),
-                _team_id: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::LeaveTeam {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for InitTournament {
-        type IxData = dao_voting_program::instruction::InitTournament;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = InitTournamentSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::InitTournament {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                tournament_address: todo!(),
-                tournament_prize: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::InitTournament {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for VoteForTournament {
-        type IxData = dao_voting_program::instruction::VoteForTournament;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = VoteForTournamentSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::VoteForTournament {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                vote_type: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::VoteForTournament {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for ViewVoteResult {
-        type IxData = dao_voting_program::instruction::ViewVoteResult;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = ViewVoteResultSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::ViewVoteResult {
-                _team_name: todo!(),
-                _team_id: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::ViewVoteResults {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for LeaveTournament {
-        type IxData = dao_voting_program::instruction::LeaveTournament;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = LeaveTournamentSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::LeaveTournament {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                vote_type: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::LeaveTournament {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for InitPercentageProposal {
-        type IxData = dao_voting_program::instruction::InitPercentageProposal;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = InitPercentageProposalSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::InitPercentageProposal {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                percentages: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::InitPercentageProposal {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for DistributionProposalHandler {
-        type IxData = dao_voting_program::instruction::DistributionProposalHandler;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = DistributionProposalHandlerSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::DistributionProposalHandler {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                vote_type: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::DistributionProposalHandler {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for CanJoinTournament {
-        type IxData = dao_voting_program::instruction::CanJoinTournament;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = CanJoinTournamentSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::CanJoinTournament {
-                _team_name: todo!(),
-                _team_id: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::CanJoinTournament {
-                team_account: todo!(),
-                signer: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
-    impl<'info> IxOps<'info> for ClaimReward {
-        type IxData = dao_voting_program::instruction::ClaimReward;
-        type IxAccounts = FuzzAccounts;
-        type IxSnapshot = ClaimRewardSnapshot<'info>;
-        fn get_data(
-            &self,
-            _client: &mut impl FuzzClient,
-            _fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<Self::IxData, FuzzingError> {
-            let data = dao_voting_program::instruction::ClaimReward {
-                _team_name: todo!(),
-                _team_id: todo!(),
-                reward: todo!(),
-            };
-            Ok(data)
-        }
-        fn get_accounts(
-            &self,
-            client: &mut impl FuzzClient,
-            fuzz_accounts: &mut FuzzAccounts,
-        ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
-            let signers = vec![todo!()];
-            let acc_meta = dao_voting_program::accounts::ClaimReward {
-                team_account: todo!(),
-                from: todo!(),
-                to: todo!(),
-                user: todo!(),
-                system_program: todo!(),
-            }
-            .to_account_metas(None);
-            Ok((signers, acc_meta))
-        }
-    }
+    // impl<'info> IxOps<'info> for RemoveMember {
+    //     type IxData = dao_voting_program::instruction::RemoveMember;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = RemoveMemberSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::RemoveMember {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             member: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::RemoveMember {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for TransferCaptain {
+    //     type IxData = dao_voting_program::instruction::TransferCaptain;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = TransferCaptainSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::TransferCaptain {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             member: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::TransferCaptain {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for LeaveTeam {
+    //     type IxData = dao_voting_program::instruction::LeaveTeam;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = LeaveTeamSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::LeaveTeam {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::LeaveTeam {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for InitTournament {
+    //     type IxData = dao_voting_program::instruction::InitTournament;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = InitTournamentSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::InitTournament {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             tournament_address: todo!(),
+    //             tournament_prize: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::InitTournament {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for VoteForTournament {
+    //     type IxData = dao_voting_program::instruction::VoteForTournament;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = VoteForTournamentSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::VoteForTournament {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             vote_type: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::VoteForTournament {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for ViewVoteResult {
+    //     type IxData = dao_voting_program::instruction::ViewVoteResult;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = ViewVoteResultSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::ViewVoteResult {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::ViewVoteResults {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for LeaveTournament {
+    //     type IxData = dao_voting_program::instruction::LeaveTournament;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = LeaveTournamentSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::LeaveTournament {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             vote_type: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::LeaveTournament {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for InitPercentageProposal {
+    //     type IxData = dao_voting_program::instruction::InitPercentageProposal;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = InitPercentageProposalSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::InitPercentageProposal {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             percentages: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::InitPercentageProposal {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for DistributionProposalHandler {
+    //     type IxData = dao_voting_program::instruction::DistributionProposalHandler;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = DistributionProposalHandlerSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::DistributionProposalHandler {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             vote_type: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::DistributionProposalHandler {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for CanJoinTournament {
+    //     type IxData = dao_voting_program::instruction::CanJoinTournament;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = CanJoinTournamentSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::CanJoinTournament {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::CanJoinTournament {
+    //             team_account: todo!(),
+    //             signer: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
+    // impl<'info> IxOps<'info> for ClaimReward {
+    //     type IxData = dao_voting_program::instruction::ClaimReward;
+    //     type IxAccounts = FuzzAccounts;
+    //     type IxSnapshot = ClaimRewardSnapshot<'info>;
+    //     fn get_data(
+    //         &self,
+    //         _client: &mut impl FuzzClient,
+    //         _fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<Self::IxData, FuzzingError> {
+    //         let data = dao_voting_program::instruction::ClaimReward {
+    //             _team_name: todo!(),
+    //             _team_id: todo!(),
+    //             reward: todo!(),
+    //         };
+    //         Ok(data)
+    //     }
+    //     fn get_accounts(
+    //         &self,
+    //         client: &mut impl FuzzClient,
+    //         fuzz_accounts: &mut FuzzAccounts,
+    //     ) -> Result<(Vec<Keypair>, Vec<AccountMeta>), FuzzingError> {
+    //         let signers = vec![todo!()];
+    //         let acc_meta = dao_voting_program::accounts::ClaimReward {
+    //             team_account: todo!(),
+    //             from: todo!(),
+    //             to: todo!(),
+    //             user: todo!(),
+    //             system_program: todo!(),
+    //         }
+    //         .to_account_metas(None);
+    //         Ok((signers, acc_meta))
+    //     }
+    // }
     #[doc = r" Use AccountsStorage<T> where T can be one of:"]
     #[doc = r" Keypair, PdaStore, TokenStore, MintStore, ProgramStore"]
     #[derive(Default)]
     pub struct FuzzAccounts {
-        from: AccountsStorage<todo!()>,
-        signer: AccountsStorage<todo!()>,
-        system_program: AccountsStorage<todo!()>,
-        team_account: AccountsStorage<todo!()>,
-        to: AccountsStorage<todo!()>,
-        user: AccountsStorage<todo!()>,
+        from: AccountsStorage<Keypair>,
+        signer: AccountsStorage<Keypair>,
+        // system_program: AccountsStorage<todo!()>,
+        team_account: AccountsStorage<PdaStore>,
+        to: AccountsStorage<Keypair>,
+        user: AccountsStorage<Keypair>,
     }
 }

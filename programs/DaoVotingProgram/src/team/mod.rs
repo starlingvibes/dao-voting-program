@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use arbitrary::{Arbitrary, Unstructured};
 
 pub mod adding_member;
 pub mod can_join;
@@ -75,8 +76,19 @@ impl TeamAccount {
     + 1; // can_join_tournament
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
+#[derive(AnchorSerialize, AnchorDeserialize, Debug)]
 pub enum VoteType {
     Yes,
     No,
+}
+
+impl<'a> Arbitrary<'a> for VoteType {
+    fn arbitrary(u: &mut Unstructured<'a>) -> std::result::Result<Self, arbitrary::Error> {
+        let vote_type = u.int_in_range(0..=1)?;
+        if vote_type == 0 {
+            return Ok(VoteType::Yes);
+        } else {
+            return Ok(VoteType::No);
+        }
+    }
 }

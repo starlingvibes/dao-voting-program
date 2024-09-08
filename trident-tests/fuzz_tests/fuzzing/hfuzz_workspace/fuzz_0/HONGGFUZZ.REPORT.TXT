@@ -1,0 +1,45 @@
+=====================================================================
+TIME: 2024-09-08.17:47:02
+=====================================================================
+FUZZER ARGS:
+ mutationsPerRun : 6
+ externalCmd     : NULL
+ fuzzStdin       : FALSE
+ timeout         : 10 (sec)
+ ignoreAddr      : (nil)
+ ASLimit         : 0 (MiB)
+ RSSLimit        : 0 (MiB)
+ DATALimit       : 0 (MiB)
+ wordlistFile    : NULL
+ dynFileMethod   : 
+ fuzzTarget      : trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0 
+CRASH:
+DESCRIPTION: 
+ORIG_FNAME: e5403ee84425a2ea9ec32c62c916851c.0000000f.honggfuzz.cov
+FUZZ_FNAME: trident-tests/fuzz_tests/fuzzing/hfuzz_workspace/fuzz_0/SIGABRT.PC.7ffff7d1b9fc.STACK.182c37f6cb.CODE.-6.ADDR.0.INSTR.mov____%eax,%r13d.fuzz
+PID: 263809
+SIGNAL: SIGABRT (6)
+PC: 0x7ffff7d1b9fc
+FAULT ADDRESS: 0x0
+INSTRUCTION: mov____%eax,%r13d
+STACK HASH: 000000182c37f6cb
+STACK:
+ <0x00007ffff7cc7476> [func:UNKNOWN file: line:0 module:/usr/lib/x86_64-linux-gnu/libc.so.6]
+ <0x00007ffff7cad7f3> [func:UNKNOWN file: line:0 module:/usr/lib/x86_64-linux-gnu/libc.so.6]
+ <0x000055555636575a> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x0000555555675c89> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x0000555555855b56> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x00005555563952b1> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x0000555556394fca> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x0000555556394f59> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x0000555556394f46> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x00005555555efb42> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x00005555555efc14> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x000055555571372b> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x0000555555701b4f> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x00005555556ffdca> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x00005555557001b5> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+ <0x00007ffff7caed90> [func:UNKNOWN file: line:0 module:/usr/lib/x86_64-linux-gnu/libc.so.6]
+ <0x00007ffff7caee40> [func:UNKNOWN file: line:0 module:/usr/lib/x86_64-linux-gnu/libc.so.6]
+ <0x000055555567d265> [func:UNKNOWN file: line:0 module:/home/starlingr007/fuzzing-with-trident-starlingvibes/project-fuzzing/trident-tests/fuzz_tests/fuzzing/hfuzz_target/x86_64-unknown-linux-gnu/release/fuzz_0]
+=====================================================================
