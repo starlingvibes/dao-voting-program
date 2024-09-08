@@ -3,10 +3,10 @@ seeds = true
 skip-lint = false
 
 [programs.localnet]
-dao_voting_program = "624QkTgSZBWeJHm9aeNuANTJY67M4742zCnEfACg2wnM"
+dao_voting_program = "EyVtWh28nawY7NDLCBoFWNC5S56s198tftxDxGEgFrFM"
 
 [programs.devnet]
-dao_voting_program = "624QkTgSZBWeJHm9aeNuANTJY67M4742zCnEfACg2wnM"
+dao_voting_program = "EyVtWh28nawY7NDLCBoFWNC5S56s198tftxDxGEgFrFM"
 
 [registry]
 url = "https://api.apr.dev"

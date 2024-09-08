@@ -3,7 +3,7 @@ use team::*;
 
 pub mod team;
 
-declare_id!("624QkTgSZBWeJHm9aeNuANTJY67M4742zCnEfACg2wnM");
+declare_id!("EyVtWh28nawY7NDLCBoFWNC5S56s198tftxDxGEgFrFM");
 
 #[program]
 pub mod dao_voting_program {
