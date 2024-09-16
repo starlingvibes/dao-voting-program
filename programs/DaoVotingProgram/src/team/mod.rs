@@ -76,7 +76,7 @@ impl TeamAccount {
     + 1; // can_join_tournament
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub enum VoteType {
     Yes,
     No,
@@ -92,3 +92,6 @@ impl<'a> Arbitrary<'a> for VoteType {
         }
     }
 }
+
+// implement copy for VoteType
+impl Copy for VoteType {}
